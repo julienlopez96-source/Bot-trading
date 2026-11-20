@@ -50,6 +50,13 @@ forex_bot/
 - **Kill switch** : créer le fichier `state/KILL_SWITCH` pour bloquer immédiatement tout nouvel ordre (`touch state/KILL_SWITCH`).
 - **Clôture forcée** : toutes les positions sont fermées à `force_close_hour` (pas de portage overnight).
 
+## News en direct (news.py, news_strategy.py)
+
+- **Calendrier économique Forex Factory** (XML, fuseau New York) + **flux RSS** quelconques (détection de la devise et de l'impact par mots-clés).
+- **Blackout** : aucun nouvel ordre de `blackout_minutes_before` à `blackout_minutes_after` autour d'une news `high`/`medium` portant sur une devise de la paire (config `news:`).
+- **Stratégie news** : dans les `news_window_minutes` suivant une news `high`, si `actual` vs `forecast` dépasse `news_surprise_threshold` (écart relatif), le bot prend une position dans le sens de la devise concernée (SL/TP basés sur l'ATR). Les news sans chiffre `actual` ne produisent aucun signal (sécurité).
+- Les news sont rafraîchies toutes les `poll_seconds` secondes ; une panne de flux n'arrête pas le bot (les dernières news connues restent en cache).
+
 ## Données de backtest
 
 Exporte les barres M5 depuis MT5 (Terminal > Boîte à outils > Historique) ou toute source CSV avec les colonnes `time,open,high,low,close,tick_volume` (`time` = timestamp Unix ou ISO).

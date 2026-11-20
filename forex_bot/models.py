@@ -1,4 +1,18 @@
 from dataclasses import dataclass
+from typing import Optional
+
+
+@dataclass
+class NewsEvent:
+    title: str
+    currency: str
+    impact: str
+    time: Optional[int] = None
+    forecast: str = ""
+    previous: str = ""
+    actual: str = ""
+    source: str = ""
+    all_day: bool = False
 
 
 @dataclass

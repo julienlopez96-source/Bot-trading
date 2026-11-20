@@ -69,6 +69,28 @@ class TelegramConfig:
 
 
 @dataclass
+class NewsConfig:
+    enabled: bool = True
+    calendar_url: str = "https://nfs.faireconomy.com/ff_calendar_thisweek.xml"
+    rss_feeds: list = None
+    poll_seconds: int = 60
+    blackout_minutes_before: int = 30
+    blackout_minutes_after: int = 30
+    blackout_impacts: list = None
+    trade_news: bool = True
+    news_window_minutes: int = 15
+    news_surprise_threshold: float = 0.02
+    news_sl_atr_mult: float = 2.0
+    news_reward_risk: float = 2.0
+
+    def __post_init__(self):
+        if self.rss_feeds is None:
+            self.rss_feeds = []
+        if self.blackout_impacts is None:
+            self.blackout_impacts = ["high", "medium"]
+
+
+@dataclass
 class Config:
     mt5: Mt5Config
     symbol: SymbolConfig
@@ -76,6 +98,7 @@ class Config:
     risk: RiskConfig
     execution: ExecutionConfig
     telegram: TelegramConfig
+    news: NewsConfig
     initial_balance: float = 10000.0
     backtest_data: str = "data/EURUSD_M5.csv"
     state_path: str = "state/risk_state.json"
@@ -114,6 +137,7 @@ def load_config(path) -> Config:
         risk=_section(raw, "risk", RiskConfig),
         execution=_section(raw, "execution", ExecutionConfig),
         telegram=telegram,
+        news=_section(raw, "news", NewsConfig),
         initial_balance=float(raw.get("initial_balance", 10000.0)),
         backtest_data=str(raw.get("backtest_data", "data/EURUSD_M5.csv")),
         state_path=str(raw.get("state_path", "state/risk_state.json")),
@@ -133,4 +157,6 @@ def load_config(path) -> Config:
         raise ValueError("Les limites de perte doivent être > 0")
     if cfg.strategy.fast_ema >= cfg.strategy.slow_ema:
         raise ValueError("fast_ema doit être < slow_ema")
+    if cfg.news.news_surprise_threshold <= 0:
+        raise ValueError("news_surprise_threshold doit être > 0")
     return cfg

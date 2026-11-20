@@ -48,6 +48,20 @@ telegram:
   bot_token: ""       # TELEGRAM_BOT_TOKEN
   chat_id: ""         # TELEGRAM_CHAT_ID
 
+news:
+  enabled: true
+  calendar_url: "https://nfs.faireconomy.com/ff_calendar_thisweek.xml"
+  rss_feeds: []       # ex: ["https://www.dailyfx.com/feeds/calendar"]
+  poll_seconds: 60    # fréquence de rafraîchissement des news
+  blackout_minutes_before: 30   # aucun nouvel ordre avant une news à fort impact
+  blackout_minutes_after: 30    # idem après la publication
+  blackout_impacts: ["high", "medium"]
+  trade_news: true              # prendre position après une news si surprise suffisante
+  news_window_minutes: 15       # fenêtre après publication pour trader la news
+  news_surprise_threshold: 0.02 # écart relatif réel vs prévision (2 %)
+  news_sl_atr_mult: 2.0         # stop-loss de la stratégie news = ATR x ce facteur
+  news_reward_risk: 2.0
+
 initial_balance: 10000.0
 backtest_data: "data/EURUSD_M5.csv"
 state_path: "state/risk_state.json"

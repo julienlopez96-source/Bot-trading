@@ -9,8 +9,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from forex_bot.backtest import compute_metrics, load_csv, run_backtest
-from forex_bot.config import (Config, ExecutionConfig, Mt5Config, RiskConfig,
-                              StrategyConfig, SymbolConfig, TelegramConfig)
+from forex_bot.config import (Config, ExecutionConfig, Mt5Config, NewsConfig,
+                              RiskConfig, StrategyConfig, SymbolConfig,
+                              TelegramConfig)
 from forex_bot.models import Rate
 from forex_bot.paper_broker import PaperBroker
 
@@ -35,6 +36,7 @@ def make_config(tmp):
         risk=RiskConfig(),
         execution=ExecutionConfig(mode="backtest", dry_run=False),
         telegram=TelegramConfig(),
+        news=NewsConfig(enabled=False),
         initial_balance=10000.0,
         log_path=str(Path(tmp) / "logs" / "trades.jsonl"),
     )

@@ -9,6 +9,8 @@ from forex_bot.config import load_config
 from forex_bot.engine import TradingEngine
 from forex_bot.monitoring import JsonlLogger, TelegramNotifier
 from forex_bot.mt5_broker import MT5Broker
+from forex_bot.news import NewsManager
+from forex_bot.news_strategy import NewsStrategy
 from forex_bot.risk import RiskManager
 from forex_bot.strategy import EmaAtrStrategy
 
@@ -42,8 +44,10 @@ def main():
         return 1
     risk = RiskManager(cfg.risk, cfg.state_path, cfg.kill_switch_path, cfg.initial_balance)
     strategy = EmaAtrStrategy(cfg.strategy, cfg.symbol)
+    news = NewsManager(cfg.news, cfg.symbol.name, logger) if cfg.news.enabled else None
+    news_strategy = NewsStrategy(cfg.news, cfg.symbol, cfg.strategy.atr_period) if cfg.news.enabled else None
     dry = args.dry_run or cfg.execution.dry_run
-    engine = TradingEngine(broker, strategy, risk, cfg, logger, notifier, dry_run=dry)
+    engine = TradingEngine(broker, strategy, risk, cfg, logger, notifier, dry_run=dry, news=news, news_strategy=news_strategy)
     try:
         engine.run()
     except KeyboardInterrupt:

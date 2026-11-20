@@ -7,7 +7,7 @@ from .strategy import EmaAtrStrategy
 
 
 class TradingEngine:
-    def __init__(self, broker, strategy: EmaAtrStrategy, risk: RiskManager, cfg: Config, logger, notifier, dry_run: bool = True):
+    def __init__(self, broker, strategy: EmaAtrStrategy, risk: RiskManager, cfg: Config, logger, notifier, dry_run: bool = True, news=None, news_strategy=None):
         self.broker = broker
         self.strategy = strategy
         self.risk = risk
@@ -15,8 +15,11 @@ class TradingEngine:
         self.logger = logger
         self.notifier = notifier
         self.dry_run = dry_run
+        self.news = news
+        self.news_strategy = news_strategy
         self.open_tickets = set()
         self._halt_reason = None
+        self._blackout_logged = False
 
     def run(self):
         self.logger.log("engine_start", mode=self.cfg.execution.mode, dry_run=self.dry_run, symbol=self.cfg.symbol.name)
@@ -67,7 +70,25 @@ class TradingEngine:
             return
 
         spread = self.broker.get_spread_pips(symbol)
-        signal = self.strategy.on_rates(rates, {p.symbol for p in positions}, spread, now.hour)
+        signal = None
+        if self.news is not None and self.cfg.news.enabled:
+            self.news.update(now)
+            if self.news.is_blackout(now):
+                if not self._blackout_logged:
+                    self._blackout_logged = True
+                    self.logger.log("news_blackout", symbol=symbol)
+                    self.notifier.send(f"Blackout news actif sur {symbol} : aucun nouvel ordre")
+                return
+            if self._blackout_logged:
+                self._blackout_logged = False
+                self.logger.log("news_blackout_over", symbol=symbol)
+            if self.news_strategy is not None:
+                for event in self.news.recent_events(now, self.cfg.news.news_window_minutes):
+                    signal = self.news_strategy.on_event(event, rates, now)
+                    if signal:
+                        break
+        if not signal:
+            signal = self.strategy.on_rates(rates, {p.symbol for p in positions}, spread, now.hour)
         if not signal:
             return
 
