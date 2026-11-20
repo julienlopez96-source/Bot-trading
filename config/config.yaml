@@ -1,0 +1,69 @@
+mt5:
+  login: 0            # ou variable d'environnement MT5_LOGIN
+  password: ""        # MT5_PASSWORD (jamais en dur dans le code)
+  server: ""          # MT5_SERVER ex: "MetaQuotes-Demo"
+  path: ""            # MT5_PATH, laisser vide si le terminal est déjà ouvert
+  timeout: 60000
+
+symbol:
+  name: "EURUSD"
+  pip_size: 0.0001    # 0.01 pour les paires JPY
+  contract_size: 100000
+  spread_pips: 1.5    # spread estimé, utilisé en backtest/paper
+  slippage_pips: 0.5  # slippage estimé en pips
+  min_lot: 0.01
+  lot_step: 0.01
+  max_lot: 10.0
+
+strategy:
+  fast_ema: 9
+  slow_ema: 21
+  atr_period: 14
+  min_atr_pips: 5.0       # volatilité minimale requise pour trader
+  sl_atr_mult: 1.5        # stop-loss = ATR x ce multiplicateur
+  reward_risk: 2.0        # take-profit = distance SL x ce ratio
+  max_spread_pips: 3.0    # spread max accepté pour entrer
+  session_start_hour: 8   # heures locales du serveur
+  session_end_hour: 22
+  lookback_bars: 200
+
+risk:
+  risk_per_trade_pct: 1.0   # risque max par trade, en % du capital
+  max_daily_loss_pct: 3.0   # perte max journalière avant arrêt automatique
+  max_drawdown_pct: 10.0    # drawdown max global avant arrêt
+  max_open_positions: 1
+  max_consecutive_losses: 3 # pertes consécutives avant pause
+  cooldown_minutes: 60      # durée de la pause
+  force_close_hour: 22      # clôture de toutes les positions à cette heure
+
+execution:
+  mode: "backtest"    # "backtest" (CSV) ou "live" (MT5)
+  dry_run: true       # true = aucun ordre réel envoyé (paper trading)
+  timeframe: "M5"
+  poll_seconds: 5
+  deviation: 20
+  magic: 20250601     # identifie les ordres passés par ce bot dans MT5
+
+telegram:
+  bot_token: ""       # TELEGRAM_BOT_TOKEN
+  chat_id: ""         # TELEGRAM_CHAT_ID
+
+news:
+  enabled: true
+  calendar_url: "https://nfs.faireconomy.com/ff_calendar_thisweek.xml"
+  rss_feeds: []       # ex: ["https://www.dailyfx.com/feeds/calendar"]
+  poll_seconds: 60    # fréquence de rafraîchissement des news
+  blackout_minutes_before: 30   # aucun nouvel ordre avant une news à fort impact
+  blackout_minutes_after: 30    # idem après la publication
+  blackout_impacts: ["high", "medium"]
+  trade_news: true              # prendre position après une news si surprise suffisante
+  news_window_minutes: 15       # fenêtre après publication pour trader la news
+  news_surprise_threshold: 0.02 # écart relatif réel vs prévision (2 %)
+  news_sl_atr_mult: 2.0         # stop-loss de la stratégie news = ATR x ce facteur
+  news_reward_risk: 2.0
+
+initial_balance: 10000.0
+backtest_data: "data/EURUSD_M5.csv"
+state_path: "state/risk_state.json"
+kill_switch_path: "state/KILL_SWITCH"
+log_path: "logs/trades.jsonl"
